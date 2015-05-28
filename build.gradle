@@ -15,11 +15,11 @@ buildscript {
 }
 
 ext {
-    compileSdkVersion = 21
-    buildToolsVersion = "21.1.1"
+    compileSdkVersion = 22
+    buildToolsVersion = "21.1.2"
 
     minSdkVersion = 9
-    targetSdkVersion = 21
+    targetSdkVersion = 22
 
     facebookSDK = 'com.facebook.android:facebook-android-sdk:4.0.1'
     androidSupport = 'com.android.support:support-v4:22.0.0'

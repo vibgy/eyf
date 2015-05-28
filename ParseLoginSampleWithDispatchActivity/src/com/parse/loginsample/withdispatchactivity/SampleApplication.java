@@ -27,6 +27,8 @@ import com.parse.Parse;
 import com.parse.ParseFacebookUtils;
 import com.parse.ParseTwitterUtils;
 
+import com.facebook.FacebookSdk;
+
 public class SampleApplication extends Application {
   @Override
   public void onCreate() {
@@ -37,6 +39,7 @@ public class SampleApplication extends Application {
     Parse.setLogLevel(Parse.LOG_LEVEL_DEBUG);
 
     ParseFacebookUtils.initialize(this);
+    FacebookSdk.sdkInitialize(this);
 
     // Optional - If you don't want to allow Twitter login, you can
     // remove this line (and other related ParseTwitterUtils calls)

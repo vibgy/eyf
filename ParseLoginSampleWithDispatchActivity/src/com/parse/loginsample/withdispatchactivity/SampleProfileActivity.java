@@ -23,20 +23,34 @@ package com.parse.loginsample.withdispatchactivity;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.DownloadManager;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
 
+import com.facebook.AccessToken;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.HttpMethod;
+import com.facebook.login.LoginManager;
 import com.parse.ParseUser;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.Arrays;
 
 /**
  * Shows the user profile. This simple activity can only function when there is a valid
  * user, so we must protect it with SampleDispatchActivity in AndroidManifest.xml.
  */
 public class SampleProfileActivity extends Activity {
+    static String TAG="SampleProfileActivity";
+
   private TextView titleTextView;
   private TextView emailTextView;
   private TextView nameTextView;
@@ -52,24 +66,26 @@ public class SampleProfileActivity extends Activity {
     titleTextView.setText(R.string.profile_title_logged_in);
 
     findViewById(R.id.logout_button).setOnClickListener(new OnClickListener() {
-      @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-      @Override
-      public void onClick(View v) {
-        ParseUser.logOut();
+        @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+        @Override
+        public void onClick(View v) {
+            ParseUser.logOut();
 
-        // FLAG_ACTIVITY_CLEAR_TASK only works on API 11, so if the user
-        // logs out on older devices, we'll just exit.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-          Intent intent = new Intent(SampleProfileActivity.this,
-              SampleDispatchActivity.class);
-          intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK
-              | Intent.FLAG_ACTIVITY_NEW_TASK);
-          startActivity(intent);
-        } else {
-          finish();
+            // FLAG_ACTIVITY_CLEAR_TASK only works on API 11, so if the user
+            // logs out on older devices, we'll just exit.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                Intent intent = new Intent(SampleProfileActivity.this,
+                        SampleDispatchActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            } else {
+                finish();
+            }
         }
-      }
     });
+
+      getFbEvents();
   }
 
   @Override
@@ -94,4 +110,50 @@ public class SampleProfileActivity extends Activity {
       }
     }
   }
+    private void getFbEvents() {
+        LoginManager.getInstance().logInWithReadPermissions(
+                this,
+                Arrays.asList("user_events"));
+
+        AccessToken token = AccessToken.getCurrentAccessToken();
+        GraphRequest request = GraphRequest.newGraphPathRequest(
+                token,
+                "/me/events",
+                new GraphRequest.Callback() {
+                    @Override
+                    public void onCompleted(
+                            //JSONObject object,
+                            GraphResponse response) {
+                        // Application code
+                        JSONObject result = response.getJSONObject();
+                        //JSONArray data = result != null?result.optJSONArray("data"):null;
+                        Log.d(TAG, "Response " + response.toString());
+                        Log.d(TAG, "object " + result.toString());
+                        //Log.d(TAG, "array " + data.toString());
+                    }
+                });
+        //Bundle parameters = new Bundle();
+        //parameters.putString("fields", "id,name,link");
+        //request.setParameters(parameters);
+        request.executeAsync();
+    }
+    private void getFbMe() {
+        AccessToken token = AccessToken.getCurrentAccessToken();
+        GraphRequest request = GraphRequest.newMeRequest(
+                token,
+                new GraphRequest.GraphJSONObjectCallback() {
+                    @Override
+                    public void onCompleted(
+                            JSONObject object,
+                            GraphResponse response) {
+                        // Application code
+                        Log.d(TAG, "Response " + response.toString());
+                        Log.d(TAG, "object " + object.toString());
+                    }
+                });
+        Bundle parameters = new Bundle();
+        parameters.putString("fields", "id,name,link");
+        request.setParameters(parameters);
+        request.executeAsync();
+    }
 }
